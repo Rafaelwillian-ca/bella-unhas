@@ -1,7 +1,6 @@
 const express = require("express");
 const cors = require("cors");
 const mysql = require("mysql2/promise");
-const nodemailer = require("nodemailer");
 
 const app = express();
 app.use(cors());
@@ -9,6 +8,7 @@ app.use(express.json());
 
 const pool = mysql.createPool({
   host:     process.env.DB_HOST,
+  port:     process.env.DB_PORT || 3306,
   user:     process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
@@ -17,7 +17,14 @@ const pool = mysql.createPool({
 });
 
 // HEALTH
-app.get("/api/health", (req, res) => res.json({ ok: true, ts: new Date() }));
+app.get("/api/health", async (req, res) => {
+  try {
+    await pool.query("SELECT 1");
+    res.json({ ok: true, db: "conectado", ts: new Date() });
+  } catch (err) {
+    res.status(500).json({ ok: false, db: "erro", error: err.message });
+  }
+});
 
 // SERVICOS
 app.get("/api/servicos", async (req, res) => {
