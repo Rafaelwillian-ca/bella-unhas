@@ -28,7 +28,7 @@ export default function Contato() {
               </div>
             ))}
 
-            <a href="https://wa.me/5500999999999" target="_blank" rel="noreferrer"
+            <a href="https://wa.me/5565996886063" target="_blank" rel="noreferrer"
               style={{ background: '#25D366', color: '#fff', padding: '14px 32px', borderRadius: 50, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 10, fontSize: '0.95rem', marginTop: 8 }}>
               💬 Chamar no WhatsApp
             </a>
