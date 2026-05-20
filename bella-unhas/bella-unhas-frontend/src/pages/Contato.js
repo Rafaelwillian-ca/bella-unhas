@@ -15,8 +15,8 @@ export default function Contato() {
             <h2 style={{ fontFamily: "'Playfair Display', serif", color: '#3a2a2e', fontSize: '1.8rem', marginBottom: 32 }}>Informações</h2>
             {[
               { icon: '📍', title: 'Endereço', info: 'Rua das Flores, 123 — Centro' },
-              { icon: '📱', title: 'WhatsApp', info: '(00) 99999-9999' },
-              { icon: '📧', title: 'E-mail', info: 'contato@bellaunhas.com.br' },
+              { icon: '📱', title: 'WhatsApp', info: '(65) 99688-6063' },
+              { icon: '📧', title: 'E-mail', info: 'claudimaracachone@gmail.com.br' },
               { icon: '🕐', title: 'Horários', info: 'Seg-Sex: 9h–19h | Sáb: 9h–17h' },
             ].map(item => (
               <div key={item.title} style={{ display: 'flex', gap: 20, marginBottom: 28, alignItems: 'flex-start' }}>
