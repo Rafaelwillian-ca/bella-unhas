@@ -14,7 +14,7 @@ export default function Contato() {
           <div>
             <h2 style={{ fontFamily: "'Playfair Display', serif", color: '#3a2a2e', fontSize: '1.8rem', marginBottom: 32 }}>Informações</h2>
             {[
-              { icon: '📍', title: 'Endereço', info: 'Rua das Flores, 123 — Centro' },
+              { icon: '📍', title: 'Endereço', info: 'Rua 5A, 1027 — Vila Horizonte' },
               { icon: '📱', title: 'WhatsApp', info: '(65) 99688-6063' },
               { icon: '📧', title: 'E-mail', info: 'claudimaracachone@gmail.com.br' },
               { icon: '🕐', title: 'Horários', info: 'Seg-Sex: 9h–19h | Sáb: 9h–17h' },
