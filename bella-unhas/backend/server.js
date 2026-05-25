@@ -1,7 +1,6 @@
 const express = require("express");
 const cors = require("cors");
 const mysql = require("mysql2/promise");
-const nodemailer = require("nodemailer");
 
 const app = express();
 app.use(cors());
@@ -17,15 +16,35 @@ const pool = mysql.createPool({
   connectionLimit: 10,
 });
 
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+async function enviarEmail(nome, telefone, servico, data, horario, observacoes) {
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "Bella Unhas Studio <onboarding@resend.dev>",
+        to: [process.env.EMAIL_DEST],
+        subject: "💅 Novo agendamento - Bella Unhas Studio",
+        html: `
+          <h2>Novo agendamento recebido!</h2>
+          <p><strong>Cliente:</strong> ${nome}</p>
+          <p><strong>Telefone:</strong> ${telefone}</p>
+          <p><strong>Serviço:</strong> ${servico}</p>
+          <p><strong>Data:</strong> ${data}</p>
+          <p><strong>Horário:</strong> ${horario}</p>
+          <p><strong>Observações:</strong> ${observacoes || "Nenhuma"}</p>
+        `,
+      }),
+    });
+    const data2 = await res.json();
+    console.log("E-mail enviado:", data2);
+  } catch (err) {
+    console.error("Erro ao enviar e-mail:", err.message);
+  }
+}
 
 // HEALTH
 app.get("/api/health", async (req, res) => {
@@ -114,7 +133,6 @@ app.post("/api/reservas", async (req, res) => {
       clienteId = r.insertId;
     }
 
-    // Busca o nome do serviço para o e-mail
     const [[servico]] = await pool.query("SELECT nome, preco FROM servicos WHERE id=?", [servico_id]);
 
     const [result] = await pool.query(
@@ -122,21 +140,7 @@ app.post("/api/reservas", async (req, res) => {
       [data, horario, clienteId, servico_id, observacoes || null]
     );
 
-    // Envia e-mail de notificação
-    transporter.sendMail({
-      from: `"Bella Unhas Studio" <${process.env.EMAIL_USER}>`,
-      to: process.env.EMAIL_DEST,
-      subject: "💅 Novo agendamento - Bella Unhas Studio",
-      html: `
-        <h2>Novo agendamento recebido!</h2>
-        <p><strong>Cliente:</strong> ${nome}</p>
-        <p><strong>Telefone:</strong> ${telefone}</p>
-        <p><strong>Serviço:</strong> ${servico ? servico.nome : servico_id}</p>
-        <p><strong>Data:</strong> ${data}</p>
-        <p><strong>Horário:</strong> ${horario}</p>
-        <p><strong>Observações:</strong> ${observacoes || "Nenhuma"}</p>
-      `,
-    }).catch(err => console.error("Erro ao enviar e-mail:", err.message));
+    enviarEmail(nome, telefone, servico ? servico.nome : servico_id, data, horario, observacoes);
 
     res.status(201).json({ id: result.insertId, status: "pendente", message: "Reserva criada com sucesso" });
   } catch (err) { res.status(500).json({ error: err.message }); }
