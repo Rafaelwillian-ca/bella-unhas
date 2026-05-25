@@ -130,7 +130,15 @@ app.delete("/api/reservas/:id", async (req, res) => {
 app.get("/api/reservas/disponiveis", async (req, res) => {
   const { data } = req.query;
   if (!data) return res.status(400).json({ error: "data e obrigatoria" });
-  const allSlots = ["07:00","07:30","08:00","08:30","09:00","09:30","10:00","10:30","11:00"];
+  const diaSemana = new Date(data).getUTCDay();
+
+if (diaSemana === 0) {
+  return res.json({ data, slots: [] });
+}
+
+const allSlots = diaSemana === 6
+  ? ["07:00","07:30","08:00","08:30","09:00","09:30","10:00","10:30","11:00"]
+  : ["07:00","07:30","08:00","08:30","09:00","09:30","10:00"];
   try {
     const [ocupados] = await pool.query("SELECT horario FROM reservas WHERE data=? AND status != 'cancelado'", [data]);
     const busy = ocupados.map(r => r.horario);
