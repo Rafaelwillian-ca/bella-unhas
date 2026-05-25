@@ -137,8 +137,8 @@ if (diaSemana === 0) {
 }
 
 const allSlots = diaSemana === 6
-  ? ["07:00","07:30","08:00","08:30","09:00","09:30","10:00","10:30","11:00"]
-  : ["07:00","07:30","08:00","08:30","09:00","09:30","10:00"];
+  ? ["07:00","07:30","08:00","08:30","09:00","09:30","10:00"];
+  : ["07:00","07:30","08:00","08:30","09:00","09:30","10:00","10:30","11:00"];
   try {
     const [ocupados] = await pool.query("SELECT horario FROM reservas WHERE data=? AND status != 'cancelado'", [data]);
     const busy = ocupados.map(r => r.horario);
