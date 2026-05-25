@@ -17,7 +17,7 @@ export default function Contato() {
               { icon: '📍', title: 'Endereço', info: 'Rua 5A, 1027 — Vila Horizonte' },
               { icon: '📱', title: 'WhatsApp', info: '(65) 99688-6063' },
               { icon: '📧', title: 'E-mail', info: 'claudimaracachone@gmail.com.br' },
-              { icon: '🕐', title: 'Horários', info: 'Seg-Sex: 9h–19h | Sáb: 9h–17h' },
+              { icon: '🕐', title: 'Horários', info: 'Seg-Sex: 07h-10h | Sáb: 7h–11h' },
             ].map(item => (
               <div key={item.title} style={{ display: 'flex', gap: 20, marginBottom: 28, alignItems: 'flex-start' }}>
                 <div style={{ width: 48, height: 48, background: '#fdf6f0', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', flexShrink: 0 }}>{item.icon}</div>
