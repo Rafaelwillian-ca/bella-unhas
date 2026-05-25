@@ -130,7 +130,7 @@ app.delete("/api/reservas/:id", async (req, res) => {
 app.get("/api/reservas/disponiveis", async (req, res) => {
   const { data } = req.query;
   if (!data) return res.status(400).json({ error: "data e obrigatoria" });
-  const allSlots = ["09:00","09:30","10:00","10:30","11:00","11:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30","18:00","18:30"];
+  const allSlots = ["07:00","07:30","08:00","08:30","09:00","09:30","10:00","10:30","11:00"];
   try {
     const [ocupados] = await pool.query("SELECT horario FROM reservas WHERE data=? AND status != 'cancelado'", [data]);
     const busy = ocupados.map(r => r.horario);
