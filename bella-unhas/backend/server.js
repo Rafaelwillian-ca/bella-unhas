@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const mysql = require("mysql2/promise");
+const nodemailer = require("nodemailer");
 
 const app = express();
 app.use(cors());
@@ -15,6 +16,15 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
 });
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
 // HEALTH
 app.get("/api/health", async (req, res) => {
   try {
@@ -102,10 +112,30 @@ app.post("/api/reservas", async (req, res) => {
       clienteId = r.insertId;
     }
 
+    // Busca o nome do serviço para o e-mail
+    const [[servico]] = await pool.query("SELECT nome, preco FROM servicos WHERE id=?", [servico_id]);
+
     const [result] = await pool.query(
       "INSERT INTO reservas (data, horario, cliente_id, servico_id, observacoes, status) VALUES (?, ?, ?, ?, ?, 'pendente')",
       [data, horario, clienteId, servico_id, observacoes || null]
     );
+
+    // Envia e-mail de notificação
+    transporter.sendMail({
+      from: `"Bella Unhas Studio" <${process.env.EMAIL_USER}>`,
+      to: process.env.EMAIL_DEST,
+      subject: "💅 Novo agendamento - Bella Unhas Studio",
+      html: `
+        <h2>Novo agendamento recebido!</h2>
+        <p><strong>Cliente:</strong> ${nome}</p>
+        <p><strong>Telefone:</strong> ${telefone}</p>
+        <p><strong>Serviço:</strong> ${servico ? servico.nome : servico_id}</p>
+        <p><strong>Data:</strong> ${data}</p>
+        <p><strong>Horário:</strong> ${horario}</p>
+        <p><strong>Observações:</strong> ${observacoes || "Nenhuma"}</p>
+      `,
+    }).catch(err => console.error("Erro ao enviar e-mail:", err.message));
+
     res.status(201).json({ id: result.insertId, status: "pendente", message: "Reserva criada com sucesso" });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -130,15 +160,17 @@ app.delete("/api/reservas/:id", async (req, res) => {
 app.get("/api/reservas/disponiveis", async (req, res) => {
   const { data } = req.query;
   if (!data) return res.status(400).json({ error: "data e obrigatoria" });
+
   const diaSemana = new Date(data).getUTCDay();
 
-if (diaSemana === 0) {
-  return res.json({ data, slots: [] });
-}
+  if (diaSemana === 0) {
+    return res.json({ data, slots: [] });
+  }
 
-const allSlots = diaSemana === 6
-  ? ["07:00","07:30","08:00","08:30","09:00","09:30","10:00"]
-  : ["07:00","07:30","08:00","08:30","09:00","09:30","10:00","10:30","11:00"];
+  const allSlots = diaSemana === 6
+    ? ["07:00","07:30","08:00","08:30","09:00","09:30","10:00","10:30","11:00"]
+    : ["07:00","07:30","08:00","08:30","09:00","09:30","10:00","10:30"];
+
   try {
     const [ocupados] = await pool.query("SELECT horario FROM reservas WHERE data=? AND status != 'cancelado'", [data]);
     const busy = ocupados.map(r => r.horario);
